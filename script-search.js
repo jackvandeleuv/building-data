@@ -2,10 +2,11 @@ function make_card(d, violationMap, rentalMap) {
     const violations = violationMap.get(d.survey_parcel) || 0;
     const rentals = rentalMap.get(d.survey_parcel) || 0;
 
+    // /index.html?type=parcel&parcelpin=${d.survey_parcel}
     return `
         <article 
             class="card"
-            data-href="/index.html?type=parcel&parcelpin=${d.survey_parcel}"
+            data-href="https://jackvandeleuv.github.io/index.html?type=parcel&parcelpin=${d.survey_parcel}"
             role="link"      
             tabindex="0"
         >
