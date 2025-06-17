@@ -20,7 +20,7 @@ function make_card(d, violationMap, rentalMap) {
             </figure>
 
             <div class="body">
-                <div class="price-line">${d.survey_address}</div>
+                <div class="survey-line">${d.survey_address}</div>
                 <div class="address">Parcel: ${d.survey_parcel}</div>
 
                 <div class="inventory">

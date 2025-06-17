@@ -187,7 +187,7 @@ function makeViolationCard(violation) {
             <div class="thumb"></div>
             <div class="details">
                 <h3 class="title">${violation.RECORD_ID}</h3>
-                <p class="price">${violation.TYPE_OF_VIOLATION}</p>
+                <p class="violation-type">${violation.TYPE_OF_VIOLATION}</p>
                 <p class="meta">Status: ${violation.TASK_STATUS} (${daysAgoLabel(violation.TASK_DATE)})</p>
             </div>
             <span class="chevron">›</span>
