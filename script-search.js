@@ -6,7 +6,7 @@ function make_card(d, violationMap, rentalMap) {
     return `
         <article 
             class="card"
-            data-href="https://jackvandeleuv.github.io?type=parcel&parcelpin=${d.survey_parcel}"
+            data-href="https://jackvandeleuv.github.io/building-data/?type=parcel&parcelpin=${d.survey_parcel}"
             role="link"      
             tabindex="0"
         >
