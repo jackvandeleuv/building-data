@@ -79,6 +79,8 @@ body {
 .searchbox {
     position: relative;
     width: 100%;
+    /* position: absolute;
+    z-index: 1; */
 }
 
 .searchbox input {
@@ -177,6 +179,8 @@ body {
 }
 
 .resultBox {
+    /* position: absolute;
+    z-index: -1; */
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -492,4 +496,13 @@ h1 {
 
 .parcelDetails {
     color: rgb(111, 111, 123);
+}
+
+.suggestionBox {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background-color: white;
+    padding: 5px;
+    border-radius: 5px;
 }

@@ -325,7 +325,12 @@ async function loadRentals(parcelpin) {
     insertRentalCards(rentals);
 }
 
-async function load_page(parcelpin) {
+export default async function loadParcelPage() {
+    const params = new URLSearchParams(window.location.search);
+    const pageType = params.get("type");
+    const parcelpin = params.get("parcelpin");
+    if (pageType !== 'parcel') return;
+
     const url = (
         `https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/` +
         `Citywide_Property_Survey_2022/FeatureServer/0/query` +
@@ -349,12 +354,3 @@ async function load_page(parcelpin) {
     await loadViolations(parcelpin);
     await loadRentals(parcelpin);
 }
-
-function main() {
-    const params = new URLSearchParams(window.location.search);
-    const pageType = params.get("type");
-    const parcel = params.get("parcelpin");
-    if (pageType === 'parcel') load_page(parcel);
-}
-
-main();
