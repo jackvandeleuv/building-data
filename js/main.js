@@ -1,5 +1,6 @@
 import loadParcelPage from "./parcelPage.js";
 import { FeatureService, FieldContainsStringStatement } from "./fetchEsri.js";
+import { RentalRegistration } from "./components/rentalRegistration.js";
 
 function makeCard(d, violationMap, rentalMap) {
     const violations = violationMap.get(d.survey_parcel) || 0;
@@ -271,6 +272,8 @@ function main() {
         document.getElementById('main').innerHTML = mainPage;
         addMainPageListeners();
         search();
+    } else if (pageType == 'rental') {
+        new RentalRegistration();
     } else {
         document.getElementById('main').innerHTML = parcelPage;
         loadParcelPage();
