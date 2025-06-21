@@ -183,7 +183,7 @@ async function get_violation_data(parcels, service) {
 
 function makeViolationCard(violation) {
     return `
-        <li class="violation-item item">
+        <li class="carosel-item item">
             <div class="thumb"></div>
             <div class="details">
                 <h3 class="title">${violation.RECORD_ID}</h3>
@@ -281,7 +281,7 @@ function makeRentalBox(rental) {
     const unitsPostfix = units === 0 ? 'Units' : units > 1 ? 'Units' : 'Unit';
 
     return `
-        <li class="violation-item item">
+        <li class="carosel-item item">
             <div class="thumb">
             </div>
             <div class="details">

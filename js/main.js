@@ -280,6 +280,7 @@ function main() {
     }
 }
 
+console.log('loaded main')
 // const URI = 'https://jackvandeleuv.github.io/building_data';
 const URI = 'http://localhost:8000';
 

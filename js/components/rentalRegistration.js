@@ -6,7 +6,7 @@ export class RentalRegistration {
             'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Rental_Registrations/FeatureServer/0/query',
             ['*'],
             this.onLoad,
-            [new FieldContainsStringStatement('DW_Parcel', '93118005')]
+            [new FieldContainsStringStatement('b1_alt_ID', 'RR16-04962')]
         );
     }
 
