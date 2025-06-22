@@ -1,11 +1,12 @@
 import loadParcelPage from "./parcelPage.js";
-import { RentalRegistrationPage } from "./components/rentalRegistrationPage.js";
+import { RentalPage } from "./components/rentalPage.js";
+import { ComplaintPage } from "./components/complaintPage.js";
+import { URI } from "./config.js";
 
 function makeCard(d, violationMap, rentalMap) {
     const violations = violationMap.get(d.survey_parcel) || 0;
     const rentals = rentalMap.get(d.survey_parcel) || 0;
 
-    // /index.html?type=parcel&parcelpin=${d.survey_parcel}
     return `
         <article 
             class="card"
@@ -272,14 +273,13 @@ function main() {
         addMainPageListeners();
         search();
     } else if (pageType == 'rental') {
-        new RentalRegistrationPage();
+        new RentalPage();
+    } else if (pageType == 'complaint') {
+        new ComplaintPage();
     } else {
         document.getElementById('main').innerHTML = parcelPage;
         loadParcelPage();
     }
 }
-
-
-const URI = 'http://localhost:8000';
 
 main();

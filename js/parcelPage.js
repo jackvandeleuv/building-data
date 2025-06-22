@@ -1,4 +1,5 @@
 import { daysAgoLabel } from './utils/utils.js';
+import { URI } from './config.js';
 
 const SURVEY_COLS = [
     'survey_address',
@@ -267,21 +268,23 @@ function makeRentalBox(rental) {
     const unitsPostfix = units === 0 ? 'Units' : units > 1 ? 'Units' : 'Unit';
 
     return `
-        <li class="carosel-item item">
-            <div class="thumb">
-            </div>
-            <div class="details">
-                <h3 class="title">${rental.b1_alt_ID}</h3>
-                <p class="price">${rental.OwnerName || rental.OwnerOrgName}</p>
-                <p class="meta">${rental.OwnerAddress}</p>
-                <p class="meta">Status: ${rental.Status} (${daysAgoLabel(rental.StatusDate)})</p>
-                <p class="meta">${units} ${unitsPostfix}</p>
+        <a href="${encodeURI(URI + '?type=rental&record_id=' + rental.b1_alt_ID)}">
+            <li class="carosel-item item">
+                <div class="thumb">
+                </div>
+                <div class="details">
+                    <h3 class="title">${rental.b1_alt_ID}</h3>
+                    <p class="price">${rental.OwnerName || rental.OwnerOrgName}</p>
+                    <p class="meta">${rental.OwnerAddress}</p>
+                    <p class="meta">Status: ${rental.Status} (${daysAgoLabel(rental.StatusDate)})</p>
+                    <p class="meta">${units} ${unitsPostfix}</p>
 
-            </div>
-            <span class="chevron">
-                ›
-            </span>
-        </li>
+                </div>
+                <span class="chevron">
+                    ›
+                </span>
+            </li>
+        </a>
     `
 }
 

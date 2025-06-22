@@ -1,4 +1,5 @@
 import { daysAgoLabel } from '../utils/utils.js';
+import { URI } from '../config.js';
 
 export class ParcelCarosel {
     constructor(containerID, data, loaded, imageLinks=[]) {
@@ -6,6 +7,13 @@ export class ParcelCarosel {
         this.data = data;
         this.loaded = loaded;
         this.imageLinks = imageLinks;
+
+        document.addEventListener('click', e => {
+        const card = e.target.closest('[data-href]');
+        if (card && !e.target.closest('button,a')) {
+            window.location = card.dataset.href;
+        }
+    });
     }
 
     makeHTML() {
@@ -76,24 +84,26 @@ class ParcelCaroselCard {
         const addressString = this.makeAddressString();
 
         return `
-            <li class="carosel-item item">
-                <div class="thumb"></div>
-                <div class="details">
-                    <h4 class="title">
-                        ${addressString}
-                    </h4>
-                    <p class="violation-type">
-                        ${this.data.parcelpin}
-                    </p>
-                    <p class="meta">
-                        ${this.data.parcel_owner}
-                    </p>
-                    <p class="meta">
-                        Transfered ${daysAgoLabel(this.data.last_transfer_date)}
-                    </p>
-                </div>
-                <span class="chevron">›</span>
-            </li>
+            <a href="${encodeURI(URI + '?type=parcel&parcelpin=' + this.data.parcelpin)}">
+                <li class="carosel-item item">
+                    <div class="thumb"></div>
+                    <div class="details">
+                        <h4 class="title">
+                            ${addressString}
+                        </h4>
+                        <p class="violation-type">
+                            ${this.data.parcelpin}
+                        </p>
+                        <p class="meta">
+                            ${this.data.parcel_owner}
+                        </p>
+                        <p class="meta">
+                            Transfered ${daysAgoLabel(this.data.last_transfer_date)}
+                        </p>
+                    </div>
+                    <span class="chevron">›</span>
+                </li>
+            </a>
         `;
     }
 }

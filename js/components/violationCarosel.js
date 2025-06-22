@@ -16,7 +16,7 @@ export class ViolationCarosel {
                 innerHTML = innerHTML + card.makeHTML();
             }
         } else if (this.data.length === 0) {
-            innerHTML = 'No parcels found.';
+            innerHTML = 'No violations found.';
         } else {
             for (const row of this.data) {
                 const card = new ViolationCaroselCard(row, this.loaded);
@@ -60,13 +60,13 @@ class ViolationCaroselCard {
                 <div class="thumb"></div>
                 <div class="details">
                     <h4 class="title">
-                        ${this.data.CURRENT_TASK_STATUS}
+                        ${this.data.TASK_STATUS}
                     </h4>
                     <p class="violation-type">
-                        ${this.data.PERMIT_ID}
+                        ${this.data.RECORD_ID}
                     </p>
                     <p class="meta">
-                        ${this.data.TYPE_OF_COMPLAINT}
+                        ${this.data.TYPE_OF_VIOLATION}
                     </p>
                     <p class="meta">
                         Last update ${daysAgoLabel(this.data.TASK_DATE)}

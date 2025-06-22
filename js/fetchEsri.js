@@ -47,7 +47,7 @@ export class FeatureService {
             const callbackID = "jsonp_" + Date.now();
 
             const params = new URLSearchParams(this.__makeParams());
-            const url = `${this.uri}?${params}&f=pjson&callback=${callbackID}`
+            const url = `${this.uri}?${params}&f=pjson&callback=${callbackID}`;
 
             window[callbackID] = (payload) => {
                 try {

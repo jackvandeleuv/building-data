@@ -2,8 +2,9 @@ import { FeatureService, WhereClause } from "../fetchEsri.js";
 import { ComplaintCarosel } from "./complaintCarosel.js";
 import { ParcelCarosel } from "./parcelCarosel.js";
 import { ViolationCarosel } from "./violationCarosel.js";
+import { loadSameOwnerParcels, loadViolations, loadComplaints } from "../utils/utils.js";
 
-export class RentalRegistrationPage {
+export class RentalPage {
     // http://localhost:8000/?type=rental&record_id=RR16-04962
     constructor() {       
         const params = new URLSearchParams(window.location.search);
@@ -11,99 +12,24 @@ export class RentalRegistrationPage {
 
         this.rentalService = new FeatureService(
             'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Rental_Registrations/FeatureServer/0/query',
-            ['*'],
+            [
+                "b1_alt_ID", "DW_Parcel", "AddressFull",
+                "FileDate", "Address", "Units",
+                "Status", "StatusDate", "OwnerName",
+                "OwnerOrgName", "OwnerAddress", "AdditionalContactName",
+                "AdditionalContactOrgName", "AdditionalContactRelation", "AdditionalContactAddress"
+            ],
             this.render,
             [new WhereClause('b1_alt_ID', this.record_id)]
         );
         this.rentalService.load();
     }
 
-    getRentalField(field) {
-        if (
-            this.rentalService.data === undefined ||
-            this.rentalService.data.length === 0 ||
-            this.rentalService.data[0][field] === undefined ||
-            this.rentalService.data[0][field] === ''
-        ) {
-            return '';
-        }
-        return this.rentalService.data[0][field].trim();
-    }
-
-    loadComplaints() {
-        if (this.complaintService !== undefined) return;
-
-        const dw_parcel = this.getRentalField('DW_Parcel');
-        const serviceDisabled = dw_parcel === '';
-        const filterStatements = [new WhereClause('DW_Parcel', dw_parcel)];
-
-        this.complaintService = new FeatureService(
-            'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Complaint_Status_History/FeatureServer/0/query',
-            [
-                'PERMIT_ID', 'FILE_DATE', 'SOURCE',
-                'CURRENT_TASK', 'CURRENT_TASK_STATUS', 'TASK_DATE',
-                'TYPE_OF_COMPLAINT'
-            ],
-            this.render,
-            filterStatements,
-            false,
-            serviceDisabled
-        );
-        this.complaintService.load();
-    }
-
-    loadViolations() {
-        if (this.violationService !== undefined) return;
-
-        const dw_parcel = this.getRentalField('DW_Parcel');
-        const serviceDisabled = dw_parcel === '';
-        const filterStatements = [new WhereClause('DW_Parcel', dw_parcel)];
-
-        this.violationService = new FeatureService(
-            'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Violation_Status_History/FeatureServer/0/query',
-            [
-                'RECORD_ID', 'FILE_DATE', 'PRIMARY_ADDRESS',
-                'TASK_NAME', 'TASK_STATUS', 'TASK_SEQUENCE_NUMBER',
-                'TYPE_OF_VIOLATION', 'OCCUPANCY_OR_USE', 'ISSUE_DATE',
-                'ACCELA_CITIZEN_ACCESS_URL', 'DW_Parcel'
-            ],
-            this.render,
-            filterStatements,
-            false,
-            serviceDisabled
-        );
-                
-        this.violationService.load();
-    }
-
-    loadParcelService() {
-        if (this.parcelService !== undefined) return;
-
-        const owner = this.getRentalField('OwnerOrgName');
-        const serviceDisabled = owner === '';
-        const filterStatements = [new WhereClause('parcel_owner', owner)];
-
-        this.parcelService = new FeatureService(
-            'https://gis.cuyahogacounty.us/server/rest/services/CCFO/EPV_Prod/FeatureServer/2/query',
-            [
-                'parcelpin', 'parcel_owner', 'last_transfer_date',
-                'last_sales_amount', 'tax_luc_description', 'prop_class_desc',
-                'parcel_addr', 'parcel_predir', 'parcel_street', 
-                'parcel_suffix', 'parcel_unit', 'parcel_city'
-            ],
-            this.render,
-            filterStatements,
-            true,
-            serviceDisabled
-        );
-        this.parcelService.load();
-    }
-
     render = () => {
         if (this.rentalService.isLoaded()) {
-            this.loadParcelService();   
-            this.loadComplaints(); 
-            this.loadViolations();   
+            this.parcelService = loadSameOwnerParcels(this.parcelService, this.rentalService, this.render, 'OwnerOrgName', 'parcel_owner');   
+            this.complaintService = loadComplaints(this.complaintService, this.rentalService, this.render, 'DW_Parcel', 'DW_Parcel'); 
+            this.violationService = loadViolations(this.violationService, this.rentalService, this.render, 'DW_Parcel', 'DW_Parcel');   
         }
 
         const parcelCarosel = new ParcelCarosel(
@@ -137,6 +63,15 @@ export class RentalRegistrationPage {
         document.getElementById('main').innerHTML = innerHTML;
     }
 
+    makeImageBannerHTML() {
+        return `
+            <header class="parcelPageBanner">
+                <a href="javascript:history.back()" class="back-btn" aria-label="Go back"><</a>
+                <img id="parcelPageImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Archean.png/1024px-Archean.png" alt="">
+            </header>
+        `;
+    }
+
     makeHTML(parcelCarosel, complaintCarosel, violationCarosel) {
         if (this.rentalService === undefined || !this.rentalService.isLoaded()) {
             return this.makeLoadingRentalCard(
@@ -162,11 +97,7 @@ export class RentalRegistrationPage {
 
     makeEmptyRentalCard(parcelCarosel, complaintCarosel, violationCarosel) {
         return `
-            <header class="parcelPageBanner">
-                <a href="javascript:history.back()" class="back-btn" aria-label="Go back"><</a>
-                <img id="parcelPageImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Archean.png/1024px-Archean.png" alt="">
-            </header>
-
+            ${this.makeImageBannerHTML()}
             <div class="content" id="content">
                 <p>No data found for ${this.rental_id}</p>
             </div>
@@ -184,11 +115,7 @@ export class RentalRegistrationPage {
 
     makeLoadingRentalCard(parcelCarosel, complaintCarosel, violationCarosel) {
         return `
-            <header class="parcelPageBanner">
-                <a href="javascript:history.back()" class="back-btn" aria-label="Go back"><</a>
-                <img id="parcelPageImage" src="" alt="">
-            </header>
-
+            ${this.makeImageBannerHTML()}
             <div class="content" id="content"> 
                 <p>Loading...</p>
             </div>
@@ -206,11 +133,7 @@ export class RentalRegistrationPage {
 
     makeRentalCard(data, parcelCarosel, complaintCarosel, violationCarosel) {
         return `
-            <header class="parcelPageBanner">
-                <a href="javascript:history.back()" class="back-btn" aria-label="Go back"><</a>
-                <img id="parcelPageImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Archean.png/1024px-Archean.png" alt="">
-            </header>
-
+            ${this.makeImageBannerHTML()}
             <div class="content" id="content">
                 <h1>${data.b1_alt_ID}</h1>
                 <p class="parcelPageSubHeader">${data.DW_Parcel}</p>

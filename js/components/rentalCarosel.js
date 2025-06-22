@@ -1,7 +1,7 @@
 import { daysAgoLabel } from '../utils/utils.js';
 import { URI } from '../config.js';
 
-export class ComplaintCarosel {
+export class RentalCarosel {
     constructor(containerID, data, loaded, imageLinks=[]) {
         this.containerID = containerID;
         this.data = data;
@@ -13,14 +13,14 @@ export class ComplaintCarosel {
         let innerHTML = '';
         if (!this.loaded) {
             for (let i = 0; i < 5; i++) {
-                const card = new ComplaintCaroselCard([], this.loaded);
+                const card = new RentalCaroselCard([], this.loaded);
                 innerHTML = innerHTML + card.makeHTML();
             }
         } else if (this.data.length === 0) {
-            innerHTML = 'No complaints found.';
+            innerHTML = 'No rentals found.';
         } else {
             for (const row of this.data) {
-                const card = new ComplaintCaroselCard(row, this.loaded);
+                const card = new RentalCaroselCard(row, this.loaded);
                 innerHTML = innerHTML + card.makeHTML();
             }
         }
@@ -33,7 +33,7 @@ export class ComplaintCarosel {
     }
 }
 
-class ComplaintCaroselCard {
+class RentalCaroselCard {
     constructor(data, loaded) {
         this.data = data;
         this.loaded = loaded;
@@ -57,21 +57,21 @@ class ComplaintCaroselCard {
         if (!this.loaded) return this.__makeDefaultHTML();
         
         return `
-            <a href="${encodeURI(URI + '?type=complaint&record_id=' + this.data.PERMIT_ID)}">
+            <a href="${encodeURI(URI + '?type=rental&record_id=' + this.data.b1_alt_ID)}">
                 <li class="carosel-item item">
                     <div class="thumb"></div>
                     <div class="details">
                         <h4 class="title">
-                            ${this.data.CURRENT_TASK_STATUS}
+                            ${this.data.Status}
                         </h4>
                         <p class="violation-type">
-                            ${this.data.PERMIT_ID}
+                            ${this.data.b1_alt_ID}
                         </p>
                         <p class="meta">
-                            ${this.data.TYPE_OF_COMPLAINT}
+                            ${this.data.OwnerOrgName}
                         </p>
                         <p class="meta">
-                            Last update ${daysAgoLabel(this.data.TASK_DATE)}
+                            Last update ${daysAgoLabel(this.data.StatusDate)}
                         </p>
                     </div>
                     <span class="chevron">›</span>
