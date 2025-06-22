@@ -3,7 +3,7 @@ import { ComplaintCarosel } from "./complaintCarosel.js";
 import { ParcelCarosel } from "./parcelCarosel.js";
 import { ViolationCarosel } from "./violationCarosel.js";
 
-export class RentalRegistrationPage {
+export class ComplaintPage {
     // http://localhost:8000/?type=rental&record_id=RR16-04962
     constructor() {       
         const params = new URLSearchParams(window.location.search);

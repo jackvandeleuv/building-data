@@ -279,19 +279,7 @@ function main() {
     }
 }
 
-console.log('loaded main')
-// const URI = 'https://jackvandeleuv.github.io/building_data';
+
 const URI = 'http://localhost:8000';
-
-// function notify() {
-//     console.log('loaded!')
-// }
-
-// const service = new FeatureService(
-//     'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Complaint_Violation_Notices/FeatureServer/0/query',
-//     ['PARCEL_NUMBER'],
-//     notify,
-//     [new FieldContainsStringStatement('PARCEL_NUMBER', '10104004')]
-// )
 
 main();

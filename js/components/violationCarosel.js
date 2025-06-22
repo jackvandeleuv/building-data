@@ -1,6 +1,6 @@
 import { daysAgoLabel } from '../utils/utils.js';
 
-export class ParcelCarosel {
+export class ViolationCarosel {
     constructor(containerID, data, loaded, imageLinks=[]) {
         this.containerID = containerID;
         this.data = data;
@@ -12,14 +12,14 @@ export class ParcelCarosel {
         let innerHTML = '';
         if (!this.loaded) {
             for (let i = 0; i < 5; i++) {
-                const card = new ParcelCaroselCard([], this.loaded);
+                const card = new ViolationCaroselCard([], this.loaded);
                 innerHTML = innerHTML + card.makeHTML();
             }
         } else if (this.data.length === 0) {
             innerHTML = 'No parcels found.';
         } else {
             for (const row of this.data) {
-                const card = new ParcelCaroselCard(row, this.loaded);
+                const card = new ViolationCaroselCard(row, this.loaded);
                 innerHTML = innerHTML + card.makeHTML();
             }
         }
@@ -32,7 +32,7 @@ export class ParcelCarosel {
     }
 }
 
-class ParcelCaroselCard {
+class ViolationCaroselCard {
     constructor(data, loaded) {
         this.data = data;
         this.loaded = loaded;
@@ -52,44 +52,24 @@ class ParcelCaroselCard {
         `;
     }
 
-    makeAddressString() {
-        if (this.data === undefined || this.data.length === 0) return '';
-
-        let addressString = [
-            this.data.parcel_addr || '',
-            this.data.parcel_predir || '',
-            this.data.parcel_street || '',
-            this.data.parcel_suffix || '',
-            this.data.parcel_unit || ''
-        ].map((elem) => elem.trim()).join(' ').trim();
-
-        // if (this.data.parcel_city !== undefined) {
-        //     addressString = addressString + `, ${this.data.parcel_city}`;
-        // }
-
-        return addressString;
-    }
-
     makeHTML() {
         if (!this.loaded) return this.__makeDefaultHTML();
         
-        const addressString = this.makeAddressString();
-
         return `
             <li class="carosel-item item">
                 <div class="thumb"></div>
                 <div class="details">
                     <h4 class="title">
-                        ${addressString}
+                        ${this.data.CURRENT_TASK_STATUS}
                     </h4>
                     <p class="violation-type">
-                        ${this.data.parcelpin}
+                        ${this.data.PERMIT_ID}
                     </p>
                     <p class="meta">
-                        ${this.data.parcel_owner}
+                        ${this.data.TYPE_OF_COMPLAINT}
                     </p>
                     <p class="meta">
-                        Transfered ${daysAgoLabel(this.data.last_transfer_date)}
+                        Last update ${daysAgoLabel(this.data.TASK_DATE)}
                     </p>
                 </div>
                 <span class="chevron">›</span>
