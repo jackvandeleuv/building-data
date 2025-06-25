@@ -1,7 +1,9 @@
 import loadParcelPage from "./parcelPage.js";
 import { RentalPage } from "./components/rentalPage.js";
 import { ComplaintPage } from "./components/complaintPage.js";
+import { ViolationPage } from "./components/violationPage.js";
 import { URI } from "./config.js";
+import { ParcelPage } from "./components/parcelPage.js";
 
 function makeCard(d, violationMap, rentalMap) {
     const violations = violationMap.get(d.survey_parcel) || 0;
@@ -272,11 +274,15 @@ function main() {
         document.getElementById('main').innerHTML = mainPage;
         addMainPageListeners();
         search();
-    } else if (pageType == 'rental') {
+    } else if (pageType === 'parcel') {
+        new ParcelPage();
+    } else if (pageType === 'rental') {
         new RentalPage();
-    } else if (pageType == 'complaint') {
+    } else if (pageType === 'complaint') {
         new ComplaintPage();
-    } else {
+    } else if (pageType === 'violation') {
+        new ViolationPage();
+    } else  {
         document.getElementById('main').innerHTML = parcelPage;
         loadParcelPage();
     }

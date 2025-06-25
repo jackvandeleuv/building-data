@@ -108,7 +108,7 @@ export function loadSameOwnerParcels(parcelService, mainRecordService, callbackF
 // DW_Parcel
 export function loadComplaints(complaintService, mainRecordService, callbackFunction, joinFieldLeft, joinFieldRight) {
     if (complaintService !== undefined) return complaintService;
-
+    console.log(mainRecordService)
     const mainRecordValue = getMainRecordField(joinFieldLeft, mainRecordService);
     const serviceDisabled = mainRecordValue === '';
     const filterStatements = [new WhereClause(joinFieldRight, mainRecordValue)];

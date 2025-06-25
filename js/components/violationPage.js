@@ -1,35 +1,36 @@
 import { FeatureService, WhereClause } from "../fetchEsri.js";
 import { RentalCarosel } from "./rentalCarosel.js";
 import { ParcelCarosel } from "./parcelCarosel.js";
-import { ViolationCarosel } from "./violationCarosel.js";
-import { loadRentals, loadViolations, loadSameOwnerParcels } from "../utils/utils.js";
+import { loadRentals, loadComplaints, loadSameOwnerParcels } from "../utils/utils.js";
+import { ComplaintCarosel } from "./complaintCarosel.js";
 
-export class ComplaintPage {
+export class ViolationPage {
     // http://localhost:8000/?type=complaint&record_id=
     constructor() {       
         const params = new URLSearchParams(window.location.search);
         this.record_id = params.get("record_id");
 
-        const filterStatements = [new WhereClause('PERMIT_ID', this.record_id)];
+        const filterStatements = [new WhereClause('RECORD_ID', this.record_id)];
 
-        this.complaintService = new FeatureService(
-            'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Complaint_Status_History/FeatureServer/0/query',
+        this.violationService = new FeatureService(
+            'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Violation_Status_History/FeatureServer/0/query',
             [
-                'PERMIT_ID', 'FILE_DATE', 'SOURCE',
-                'CURRENT_TASK', 'CURRENT_TASK_STATUS', 'TASK_DATE',
-                'TYPE_OF_COMPLAINT', 'DW_Parcel'
+                'RECORD_ID', 'FILE_DATE', 'PRIMARY_ADDRESS',
+                'TASK_NAME', 'TASK_STATUS', 'TASK_SEQUENCE_NUMBER',
+                'TYPE_OF_VIOLATION', 'OCCUPANCY_OR_USE', 'ISSUE_DATE',
+                'ACCELA_CITIZEN_ACCESS_URL', 'DW_Parcel', 'TASK_DATE'
             ],
             this.render,
-            filterStatements,
+            filterStatements
         );
-        this.complaintService.load();
+        this.violationService.load();
     }
 
     render = () => {
-        if (this.complaintService.isLoaded()) {
-            this.parcelService = loadSameOwnerParcels(this.parcelService, this.complaintService, this.render, 'OwnerOrgName', 'parcel_owner');   
-            this.rentalService = loadRentals(this.rentalService, this.complaintService, this.render, 'DW_Parcel', 'DW_Parcel'); 
-            this.violationService = loadViolations(this.violationService, this.complaintService, this.render, 'DW_Parcel', 'DW_Parcel');   
+        if (this.violationService.isLoaded()) {
+            this.parcelService = loadSameOwnerParcels(this.parcelService, this.violationService, this.render, 'OwnerOrgName', 'parcel_owner');   
+            this.rentalService = loadRentals(this.rentalService, this.violationService, this.render, 'DW_Parcel', 'DW_Parcel'); 
+            this.complaintService = loadComplaints(this.complaintService, this.violationService, this.render, 'DW_Parcel', 'DW_Parcel'); 
         }
 
         const parcelCarosel = new ParcelCarosel(
@@ -44,10 +45,10 @@ export class ComplaintPage {
             this.rentalService !== undefined ? this.rentalService.isLoaded() : false
         );
 
-        const violationCarosel = new ViolationCarosel(
-            'violationCarosel', 
-            this.violationService !== undefined ? this.violationService.data : [],
-            this.violationService !== undefined ? this.violationService.isLoaded() : false
+        const complaintCarosel = new ComplaintCarosel(
+            'complaintCarosel', 
+            this.complaintService !== undefined ? this.complaintService.data : [],
+            this.complaintService !== undefined ? this.complaintService.isLoaded() : false
         );
 
         const innerHTML = `
@@ -55,7 +56,7 @@ export class ComplaintPage {
                 ${this.makeHTML(
                     parcelCarosel.makeHTML(),
                     rentalCarosel.makeHTML(),
-                    violationCarosel.makeHTML()
+                    complaintCarosel.makeHTML()
                 )}
             </div>
         `;
@@ -63,26 +64,26 @@ export class ComplaintPage {
         document.getElementById('main').innerHTML = innerHTML;
     }
 
-    makeHTML(parcelCarosel, rentalCarosel, violationCarosel) {
-        if (this.complaintService === undefined || !this.complaintService.isLoaded()) {
+    makeHTML(parcelCarosel, rentalCarosel, complaintCarosel) {
+        if (this.violationService === undefined || !this.violationService.isLoaded()) {
             return this.makeLoadingCard(
                 parcelCarosel, 
                 rentalCarosel, 
-                violationCarosel
+                complaintCarosel
             )
         }
-        if (this.complaintService.data.length === 0) {
+        if (this.violationService.data.length === 0) {
             return this.makeEmptyCard(
                 parcelCarosel, 
                 rentalCarosel, 
-                violationCarosel
+                complaintCarosel
             )
         }
         return this.makeCard(
-            this.complaintService.data[0],
+            this.violationService.data[0],
             parcelCarosel,
             rentalCarosel,
-            violationCarosel
+            complaintCarosel
         )
     }
 
@@ -95,7 +96,7 @@ export class ComplaintPage {
         `;
     }
 
-    makeEmptyCard(parcelCarosel, rentalCarosel, violationCarosel) {
+    makeEmptyCard(parcelCarosel, rentalCarosel, complaintCarosel) {
         return `
             ${this.makeImageBannerHTML()}
             <div class="content" id="content">
@@ -105,15 +106,15 @@ export class ComplaintPage {
             <h3>Parcels With The Same Owner</h3>
             ${parcelCarosel}
             <hr>
-            <h3>Complaints About This Parcel</h3>
+            <h3>Rental Registrations At This Parcel</h3>
             ${rentalCarosel}
             <hr>
-            <h3>Violations About This Parcel</h3>
-            ${violationCarosel}
+            <h3>Complaints About This Parcel</h3>
+            ${complaintCarosel}
         `;
     }
 
-    makeLoadingCard(parcelCarosel, rentalCarosel, violationCarosel) {
+    makeLoadingCard(parcelCarosel, rentalCarosel, complaintCarosel) {
         return `
             ${this.makeImageBannerHTML()}
             <div class="content" id="content"> 
@@ -123,15 +124,15 @@ export class ComplaintPage {
             <h3>Parcels With The Same Owner</h3>
             ${parcelCarosel}
             <hr>
-            <h3>Complaints About This Parcel</h3>
+            <h3>Rental Registrations At Parcel</h3>
             ${rentalCarosel}
             <hr>
-            <h3>Violations At This Parcel</h3>
-            ${violationCarosel}
+            <h3>Complaints About This Parcel</h3>
+            ${complaintCarosel}
         `;
     }
 
-    makeCard(data, parcelCarosel, rentalCarosel, violationCarosel) {
+    makeCard(data, parcelCarosel, rentalCarosel, complaintCarosel) {
         console.log('making card with:')
         console.log(data)
         return `
@@ -155,8 +156,8 @@ export class ComplaintPage {
             <h3>Rental Registrations At This Parcel</h3>
             ${rentalCarosel}
             <hr>
-            <h3>Violations At This Parcel</h3>
-            ${violationCarosel}
+            <h3>Complaints About This Parcel</h3>
+            ${complaintCarosel}
         `;
     }
 }

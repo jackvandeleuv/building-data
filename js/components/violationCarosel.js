@@ -1,4 +1,5 @@
 import { daysAgoLabel } from '../utils/utils.js';
+import { URI } from '../config.js';
 
 export class ViolationCarosel {
     constructor(containerID, data, loaded, imageLinks=[]) {
@@ -56,24 +57,26 @@ class ViolationCaroselCard {
         if (!this.loaded) return this.__makeDefaultHTML();
         
         return `
-            <li class="carosel-item item">
-                <div class="thumb"></div>
-                <div class="details">
-                    <h4 class="title">
-                        ${this.data.TASK_STATUS}
-                    </h4>
-                    <p class="violation-type">
-                        ${this.data.RECORD_ID}
-                    </p>
-                    <p class="meta">
-                        ${this.data.TYPE_OF_VIOLATION}
-                    </p>
-                    <p class="meta">
-                        Last update ${daysAgoLabel(this.data.TASK_DATE)}
-                    </p>
-                </div>
-                <span class="chevron">›</span>
-            </li>
+            <a href="${encodeURI(URI + '?type=violation&record_id=' + this.data.RECORD_ID)}">
+                <li class="carosel-item item">
+                    <div class="thumb"></div>
+                    <div class="details">
+                        <h4 class="title">
+                            ${this.data.TASK_STATUS}
+                        </h4>
+                        <p class="violation-type">
+                            ${this.data.RECORD_ID}
+                        </p>
+                        <p class="meta">
+                            ${this.data.TYPE_OF_VIOLATION}
+                        </p>
+                        <p class="meta">
+                            Last update ${daysAgoLabel(this.data.TASK_DATE)}
+                        </p>
+                    </div>
+                    <span class="chevron">›</span>
+                </li>
+            </a>
         `;
     }
 }

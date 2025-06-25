@@ -318,7 +318,7 @@ export default async function loadParcelPage() {
     const params = new URLSearchParams(window.location.search);
     const pageType = params.get("type");
     const parcelpin = params.get("parcelpin");
-    if (pageType !== 'parcel') return;
+    if (pageType !== 'test-parcel') return;
 
     const url = (
         `https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/` +
