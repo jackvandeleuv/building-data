@@ -1,82 +1,85 @@
 import { daysAgoLabel } from '../utils/utils.js';
 import { URI } from '../config.js';
+import { FeatureService } from '../fetchEsri.js';
 
 export class ViolationCarosel {
-    constructor(containerID, data, loaded, imageLinks=[]) {
+    constructor(containerID) {
         this.containerID = containerID;
-        this.data = data;
-        this.loaded = loaded;
-        this.imageLinks = imageLinks;
+        this.__loaded = false;
+        this.__loading = false;
     }
 
-    makeHTML() {
-        let innerHTML = '';
-        if (!this.loaded) {
-            for (let i = 0; i < 5; i++) {
-                const card = new ViolationCaroselCard([], this.loaded);
-                innerHTML = innerHTML + card.makeHTML();
-            }
-        } else if (this.data.length === 0) {
-            innerHTML = 'No violations found.';
+    isLoaded() {
+        return this.__loaded;
+    }
+
+    isLoading() {
+        return this.__loading;
+    }
+
+    async load(callbackFunction, filterStatements) {
+        if (this.__loading || this.__loaded) return;
+        this.__loading = true;
+
+        this.__service = new FeatureService(
+            'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Violation_Status_History/FeatureServer/0/query',
+            [
+                'RECORD_ID', 'FILE_DATE', 'PRIMARY_ADDRESS',
+                'TASK_NAME', 'TASK_STATUS', 'TASK_SEQUENCE_NUMBER',
+                'TYPE_OF_VIOLATION', 'OCCUPANCY_OR_USE', 'ISSUE_DATE',
+                'ACCELA_CITIZEN_ACCESS_URL', 'DW_Parcel', 'TASK_DATE'
+            ],
+            callbackFunction,
+            filterStatements,
+            false,
+            serviceDisabled
+        );
+        await this.__service.load();
+
+        if (this.__service.isLoaded()) {
+            renderLoadedComponent()
         } else {
-            for (const row of this.data) {
-                const card = new ViolationCaroselCard(row, this.loaded);
-                innerHTML = innerHTML + card.makeHTML();
-            }
+            renderEmptyComponent()
         }
 
-        return `
-            <div class="parcelDetails" id="${this.containerID}">
-                ${innerHTML}
-            </div>
-        `;
-    }
-}
-
-class ViolationCaroselCard {
-    constructor(data, loaded) {
-        this.data = data;
-        this.loaded = loaded;
+        this.__loaded = this.__service.isLoaded();
+        this.__loading = false;
     }
 
-    __makeDefaultHTML() {
+    makeLoadedCard(row) {
         return `
-            <li class="carosel-item item">
-                <div class="thumb"></div>
-                <div class="details">
-                    <h3 class="title">Loading...</h3>
-                    <p class="violation-type"></p>
-                    <p class="meta"></p>
-                </div>
-                <span class="chevron">›</span>
-            </li>
-        `;
-    }
-
-    makeHTML() {
-        if (!this.loaded) return this.__makeDefaultHTML();
-        
-        return `
-            <a href="${encodeURI(URI + '?type=violation&record_id=' + this.data.RECORD_ID)}">
+            <a href="${encodeURI(URI + '?type=violation&record_id=' + row.RECORD_ID)}">
                 <li class="carosel-item item">
                     <div class="thumb"></div>
                     <div class="details">
                         <h4 class="title">
-                            ${this.data.TASK_STATUS}
+                            ${row.TASK_STATUS}
                         </h4>
                         <p class="violation-type">
-                            ${this.data.RECORD_ID}
+                            ${row.RECORD_ID}
                         </p>
                         <p class="meta">
-                            ${this.data.TYPE_OF_VIOLATION}
+                            ${row.TYPE_OF_VIOLATION}
                         </p>
                         <p class="meta">
-                            Last update ${daysAgoLabel(this.data.TASK_DATE)}
+                            Last update ${daysAgoLabel(row.TASK_DATE)}
                         </p>
                     </div>
                     <span class="chevron">›</span>
                 </li>
             </a>
         `;
+    }
+
+    renderEmptyComponent() {
+        document.getElementById(this.containerID).innerHTML = 'No violations found.';
+    }
+
+    renderLoadedComponent() {
+        let innerHTML = '';
+        for (const row of this.__service.data) {
+            innerHTML = innerHTML + this.makeLoadedCard(row);
+        }
+        document.getElementById(this.containerID).innerHTML = innerHTML;
     }
 }

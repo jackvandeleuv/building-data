@@ -1,74 +1,59 @@
 import { daysAgoLabel } from '../utils/utils.js';
 import { URI } from '../config.js';
+import { FeatureService } from '../fetchEsri.js';
 
 export class ParcelCarosel {
-    constructor(containerID, data, loaded, imageLinks=[]) {
+    constructor(containerID) {
         this.containerID = containerID;
-        this.data = data;
-        this.loaded = loaded;
-        this.imageLinks = imageLinks;
-
-        document.addEventListener('click', e => {
-        const card = e.target.closest('[data-href]');
-        if (card && !e.target.closest('button,a')) {
-            window.location = card.dataset.href;
-        }
-    });
+        this.__loaded = false;
+        this.__loading = false;
     }
 
-    makeHTML() {
-        let innerHTML = '';
-        if (!this.loaded) {
-            for (let i = 0; i < 5; i++) {
-                const card = new ParcelCaroselCard([], this.loaded);
-                innerHTML = innerHTML + card.makeHTML();
-            }
-        } else if (this.data.length === 0) {
-            innerHTML = 'No parcels found.';
+    isLoaded() {
+        return this.__loaded;
+    }
+
+    isLoading() {
+        return this.__loading;
+    }
+
+    async load(callbackFunction, filterStatements) {
+        if (this.__loading || this.__loaded) return;
+        this.__loading = true;
+
+        this.__service = new FeatureService(
+            'https://gis.cuyahogacounty.us/server/rest/services/CCFO/EPV_Prod/FeatureServer/2/query',
+            [
+                'parcelpin', 'parcel_owner', 'last_transfer_date',
+                'last_sales_amount', 'tax_luc_description', 'prop_class_desc',
+                'parcel_addr', 'parcel_predir', 'parcel_street', 
+                'parcel_suffix', 'parcel_unit', 'parcel_city'
+            ],
+            callbackFunction,
+            filterStatements,
+            true
+        );
+        await this.__service.load();
+
+        if (this.__service.isLoaded()) {
+            renderLoadedComponent()
         } else {
-            for (const row of this.data) {
-                const card = new ParcelCaroselCard(row, this.loaded);
-                innerHTML = innerHTML + card.makeHTML();
-            }
+            renderEmptyComponent()
         }
 
-        return `
-            <div class="parcelDetails" id="${this.containerID}">
-                ${innerHTML}
-            </div>
-        `;
-    }
-}
-
-class ParcelCaroselCard {
-    constructor(data, loaded) {
-        this.data = data;
-        this.loaded = loaded;
+        this.__loaded = this.__service.isLoaded();
+        this.__loading = false;
     }
 
-    __makeDefaultHTML() {
-        return `
-            <li class="carosel-item item">
-                <div class="thumb"></div>
-                <div class="details">
-                    <h3 class="title">Loading...</h3>
-                    <p class="violation-type"></p>
-                    <p class="meta"></p>
-                </div>
-                <span class="chevron">›</span>
-            </li>
-        `;
-    }
-
-    makeAddressString() {
-        if (this.data === undefined || this.data.length === 0) return '';
+    makeAddressString(data) {
+        if (data === undefined || data.length === 0) return '';
 
         let addressString = [
-            this.data.parcel_addr || '',
-            this.data.parcel_predir || '',
-            this.data.parcel_street || '',
-            this.data.parcel_suffix || '',
-            this.data.parcel_unit || ''
+            data.parcel_addr || '',
+            data.parcel_predir || '',
+            data.parcel_street || '',
+            data.parcel_suffix || '',
+            data.parcel_unit || ''
         ].map((elem) => elem.trim()).join(' ').trim();
 
         // if (this.data.parcel_city !== undefined) {
@@ -78,13 +63,11 @@ class ParcelCaroselCard {
         return addressString;
     }
 
-    makeHTML() {
-        if (!this.loaded) return this.__makeDefaultHTML();
-        
-        const addressString = this.makeAddressString();
+    makeLoadedCard(row) {
+        const addressString = this.makeAddressString(this.__service.data);
 
         return `
-            <a href="${encodeURI(URI + '?type=parcel&parcelpin=' + this.data.parcelpin)}">
+            <a href="${encodeURI(URI + '?type=parcel&parcelpin=' + row.parcelpin)}">
                 <li class="carosel-item item">
                     <div class="thumb"></div>
                     <div class="details">
@@ -92,18 +75,30 @@ class ParcelCaroselCard {
                             ${addressString}
                         </h4>
                         <p class="violation-type">
-                            ${this.data.parcelpin}
+                            ${row.parcelpin}
                         </p>
                         <p class="meta">
-                            ${this.data.parcel_owner}
+                            ${row.parcel_owner}
                         </p>
                         <p class="meta">
-                            Transfered ${daysAgoLabel(this.data.last_transfer_date)}
+                            Transfered ${daysAgoLabel(row.last_transfer_date)}
                         </p>
                     </div>
                     <span class="chevron">›</span>
                 </li>
             </a>
         `;
+    }
+
+    renderEmptyComponent() {
+        document.getElementById(this.containerID).innerHTML = 'No parcels found.';
+    }
+
+    renderLoadedComponent() {
+        let innerHTML = '';
+        for (const row of this.__service.data) {
+            innerHTML = innerHTML + this.makeLoadedCard(row);
+        }
+        document.getElementById(this.containerID).innerHTML = innerHTML;
     }
 }
