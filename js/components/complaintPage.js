@@ -5,7 +5,7 @@ import { ViolationCarosel } from "./violationCarosel.js";
 import { ComplaintBody } from "./complaintBody.js";
 
 export class ComplaintPage {
-    // http://localhost:8000/?type=complaint&record_id=
+    // http://localhost:8000/?type=complaint&record_id=CMP17024869
     constructor() {       
         document.getElementById('main').innerHTML = `
             <header class="parcelPageBanner">
@@ -16,14 +16,15 @@ export class ComplaintPage {
                 <p>Loading...</p>
             </div>
             <hr>
-            <h3>Parcels With The Same Owner</h3>
-            <div id="parcelCarosel"></div>
-            <hr>
-            <h3>Complaints About This Parcel</h3>
-            <div id="rentalCarosel"></div>
+            <h3>Rental Registrations At This Parcel</h3>
+            <div id="rentalCarosel">
+                Loading...
+            </div>
             <hr>
             <h3>Violations About This Parcel</h3>
-            <div id="violationCarosel"></div>
+            <div id="violationCarosel">
+                Loading...
+            </div>
         `;
 
         const params = new URLSearchParams(window.location.search);
@@ -33,7 +34,6 @@ export class ComplaintPage {
 
         this.__complaintBody = new ComplaintBody('content');
 
-        this.__parcelCarosel = new ParcelCarosel('parcelCarosel');
         this.__rentalCarosel = new RentalCarosel('rentalCarosel');
         this.__violationCarosel = new ViolationCarosel('violationCarosel');
 
@@ -41,15 +41,13 @@ export class ComplaintPage {
     }
 
     __renderCarosels = () => {
-        if (this.__complaintBody.isLoaded()) {
+        if (!this.__complaintBody.isLoaded()) {
             console.error('Could not load complaint.');
             return;
         }
         
         const parcel = this.__complaintBody.parcel;
-        const owner = this.__complaintBody.owner;
 
-        this.__parcelCarosel.load(() => {}, [new WhereClause('parcel_owner', owner)]);
         this.__rentalCarosel.load(() => {}, [new WhereClause('DW_Parcel', parcel)]);
         this.__violationCarosel.load(() => {}, [new WhereClause('DW_Parcel', parcel)]);
     }

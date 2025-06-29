@@ -35,10 +35,10 @@ export class RentalCarosel {
         );
         await this.__service.load();
 
-        if (this.__service.isLoaded()) {
-            renderLoadedComponent()
+        if (this.__service.isLoaded() && this.__service.data !== undefined && this.__service.data.length !== 0) {
+            this.renderLoadedComponent()
         } else {
-            renderEmptyComponent()
+            this.renderEmptyComponent()
         }
 
         this.__loaded = this.__service.isLoaded();
@@ -75,6 +75,8 @@ export class RentalCarosel {
     }
 
     renderLoadedComponent() {
+        console.log('rendering loaded rental carosel')
+        console.log(this.__service.data)
         let innerHTML = '';
         for (const row of this.__service.data) {
             innerHTML = innerHTML + this.makeLoadedCard(row);

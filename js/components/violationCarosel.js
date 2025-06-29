@@ -30,16 +30,14 @@ export class ViolationCarosel {
                 'ACCELA_CITIZEN_ACCESS_URL', 'DW_Parcel', 'TASK_DATE'
             ],
             callbackFunction,
-            filterStatements,
-            false,
-            serviceDisabled
+            filterStatements
         );
         await this.__service.load();
 
-        if (this.__service.isLoaded()) {
-            renderLoadedComponent()
+        if (this.__service.isLoaded() && this.__service.data !== undefined && this.__service.data.length !== 0) {
+            this.renderLoadedComponent()
         } else {
-            renderEmptyComponent()
+            this.renderEmptyComponent()
         }
 
         this.__loaded = this.__service.isLoaded();

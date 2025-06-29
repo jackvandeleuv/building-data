@@ -26,18 +26,19 @@ export class ComplaintBody {
                 'CURRENT_TASK', 'CURRENT_TASK_STATUS', 'TASK_DATE',
                 'TYPE_OF_COMPLAINT', 'DW_Parcel'
             ],
-            callbackFunction,
+            (() => {}),
             filterStatements,
         );
         await this.__service.load();
 
         if (this.__service.isLoaded()) {
-            renderLoadedComponent()
+            this.renderLoadedComponent()
         } else {
-            renderEmptyComponent()
+            this.renderEmptyComponent()
         }
 
         if (this.__service.data === undefined || this.__service.data.length === 0) {
+            console.log('complaintBody load fail!');
             this.__loaded = false;
             this.__loading = false;
             return;
@@ -46,6 +47,7 @@ export class ComplaintBody {
         this.parcel = this.__service.data[0].DW_Parcel || '';
         this.__loaded = this.__service.isLoaded();
         this.__loading = false;
+        callbackFunction();
     }
     
     renderLoadedComponent() {
