@@ -38,7 +38,6 @@ export class ComplaintBody {
         }
 
         if (this.__service.data === undefined || this.__service.data.length === 0) {
-            console.log('complaintBody load fail!');
             this.__loaded = false;
             this.__loading = false;
             return;

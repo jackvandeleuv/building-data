@@ -1,13 +1,14 @@
 import { daysAgoLabel } from '../utils/utils.js';
 import { URI } from '../config.js';
 import { FeatureService } from '../fetchEsri.js';
+import { getParcelImage } from '../utils/utils.js';
 
 export class ParcelCarosel {
     constructor(containerID) {
         this.containerID = containerID;
         this.__loaded = false;
         this.__loading = false;
-    }
+    } 
 
     isLoaded() {
         return this.__loaded;
@@ -36,7 +37,7 @@ export class ParcelCarosel {
         await this.__service.load();
 
         if (this.__service.isLoaded() && this.__service.data !== undefined && this.__service.data.length !== 0) {
-            this.renderLoadedComponent()
+            await this.renderLoadedComponent()
         } else {
             this.renderEmptyComponent()
         }
@@ -63,13 +64,13 @@ export class ParcelCarosel {
         return addressString;
     }
 
-    makeLoadedCard(row) {
+    makeLoadedCard(row, i) {
         const addressString = this.makeAddressString(this.__service.data);
 
         return `
             <a href="${encodeURI(URI + '?type=parcel&parcelpin=' + row.parcelpin)}">
                 <li class="carosel-item item">
-                    <div class="thumb"></div>
+                    <img class="thumb" id="parcelCardImage_${i}" src="">
                     <div class="details">
                         <h4 class="title">
                             ${addressString}
@@ -94,11 +95,17 @@ export class ParcelCarosel {
         document.getElementById(this.containerID).innerHTML = 'No parcels found.';
     }
 
-    renderLoadedComponent() {
+    async renderLoadedComponent() {
+        let i = 0;
         let innerHTML = '';
         for (const row of this.__service.data) {
-            innerHTML = innerHTML + this.makeLoadedCard(row);
+            innerHTML = innerHTML + this.makeLoadedCard(row, i++);
         }
         document.getElementById(this.containerID).innerHTML = innerHTML;
+
+        let j = 0;
+        for (const row of this.__service.data) {
+            await getParcelImage(`parcelCardImage_${j++}`, row.parcelpin)
+        }
     }
 }

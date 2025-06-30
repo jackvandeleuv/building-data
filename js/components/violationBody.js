@@ -18,7 +18,6 @@ export class ViolationBody {
     async load(callbackFunction, filterStatements) {
         if (this.__loading || this.__loaded) return;
         this.__loading = true;
-        console.log(filterStatements)
 
         this.__service = new FeatureService(
             'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Violation_Status_History/FeatureServer/0/query',
@@ -28,10 +27,11 @@ export class ViolationBody {
                 'TYPE_OF_VIOLATION', 'OCCUPANCY_OR_USE', 'ISSUE_DATE',
                 'ACCELA_CITIZEN_ACCESS_URL', 'DW_Parcel', 'TASK_DATE'
             ],
-            callbackFunction,
+            (() => {}),
             filterStatements
         );
         await this.__service.load();
+        console.log(this.__service)
 
         if (this.__service.isLoaded()) {
             this.renderLoadedComponent()

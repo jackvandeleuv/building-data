@@ -1,4 +1,4 @@
-import { daysAgoLabel } from '../utils/utils.js';
+import { daysAgoLabel, getParcelImage } from '../utils/utils.js';
 import { URI } from '../config.js';
 import { FeatureService } from '../fetchEsri.js';
 
@@ -35,7 +35,7 @@ export class ViolationCarosel {
         await this.__service.load();
 
         if (this.__service.isLoaded() && this.__service.data !== undefined && this.__service.data.length !== 0) {
-            this.renderLoadedComponent()
+            await this.renderLoadedComponent()
         } else {
             this.renderEmptyComponent()
         }
@@ -44,11 +44,11 @@ export class ViolationCarosel {
         this.__loading = false;
     }
 
-    makeLoadedCard(row) {
+    makeLoadedCard(row, i) {
         return `
             <a href="${encodeURI(URI + '?type=violation&record_id=' + row.RECORD_ID)}">
                 <li class="carosel-item item">
-                    <div class="thumb"></div>
+                    <img class="thumb" id="violationCardImage_${i}" src="">
                     <div class="details">
                         <h4 class="title">
                             ${row.TASK_STATUS}
@@ -73,11 +73,17 @@ export class ViolationCarosel {
         document.getElementById(this.containerID).innerHTML = 'No violations found.';
     }
 
-    renderLoadedComponent() {
+    async renderLoadedComponent() {
         let innerHTML = '';
+        let i = 0;
         for (const row of this.__service.data) {
-            innerHTML = innerHTML + this.makeLoadedCard(row);
+            innerHTML = innerHTML + this.makeLoadedCard(row, i++)
         }
         document.getElementById(this.containerID).innerHTML = innerHTML;
+
+        let j = 0;
+        for (const row of this.__service.data) {
+            await getParcelImage(`violationCardImage_${j++}`, row.DW_Parcel)
+        }
     }
 }

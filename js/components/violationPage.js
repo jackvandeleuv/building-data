@@ -2,6 +2,7 @@ import { WhereClause } from "../fetchEsri.js";
 import { RentalCarosel } from "./rentalCarosel.js";
 import { ComplaintCarosel } from "./complaintCarosel.js";
 import { ViolationBody } from "./violationBody.js";
+import { getParcelImage } from "../utils/utils.js";
 
 export class ViolationPage {
     // http://localhost:8000/?type=violation&record_id=V18037037
@@ -9,7 +10,7 @@ export class ViolationPage {
         document.getElementById('main').innerHTML = `
             <header class="parcelPageBanner">
                 <a href="javascript:history.back()" class="back-btn" aria-label="Go back"><</a>
-                <img id="parcelPageImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Archean.png/1024px-Archean.png" alt="">
+                <img id="headerImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Archean.png/1024px-Archean.png" alt="">
             </header>            
             <div class="content" id="content"> 
                 <p>Loading...</p>
@@ -47,6 +48,7 @@ export class ViolationPage {
         
         const parcel = this.__violationBody.parcel;
 
+        getParcelImage('headerImage', parcel);
         this.__rentalCarosel.load((() => {}), [new WhereClause('DW_Parcel', parcel)]);
         this.__complaintCarosel.load((() => {}), [new WhereClause('DW_Parcel', parcel)]);
     }

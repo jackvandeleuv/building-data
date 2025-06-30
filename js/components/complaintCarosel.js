@@ -1,6 +1,7 @@
 import { daysAgoLabel } from '../utils/utils.js';
 import { URI } from '../config.js';
 import { FeatureService } from '../fetchEsri.js';
+import { getParcelImage } from '../utils/utils.js';
 
 export class ComplaintCarosel {
     constructor(containerID) {
@@ -34,7 +35,7 @@ export class ComplaintCarosel {
         await this.__service.load();
 
         if (this.__service.isLoaded() && this.__service.data !== undefined && this.__service.data.length !== 0) {
-            this.renderLoadedComponent()
+            await this.renderLoadedComponent()
         } else {
             this.renderEmptyComponent()
         }
@@ -43,11 +44,12 @@ export class ComplaintCarosel {
         this.__loading = false;
     }
 
-    makeLoadedCard(row) {
+    makeLoadedCard(row, i) {
+        console.log(i)
         return `
             <a href="${encodeURI(URI + '?type=complaint&record_id=' + row.PERMIT_ID)}">
                 <li class="carosel-item item">
-                    <div class="thumb"></div>
+                    <img class="thumb" id="complaintCardImage_${i}" src="">
                     <div class="details">
                         <h4 class="title">
                             ${row.CURRENT_TASK_STATUS}
@@ -72,11 +74,17 @@ export class ComplaintCarosel {
         document.getElementById(this.containerID).innerHTML = 'No complaints found.';
     }
 
-    renderLoadedComponent() {
+    async renderLoadedComponent() {
+        let i = 0;
         let innerHTML = '';
         for (const row of this.__service.data) {
-            innerHTML = innerHTML + this.makeLoadedCard(row);
+            innerHTML = innerHTML + this.makeLoadedCard(row, i++);
         }
         document.getElementById(this.containerID).innerHTML = innerHTML;
+
+        let j = 0;
+        for (const _ of this.__service.data) {
+            await getParcelImage(`complaintCardImage_${j++}`, row.DW_Parcel)
+        }
     }
 }

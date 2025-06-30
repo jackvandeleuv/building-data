@@ -128,3 +128,33 @@ export function loadComplaints(complaintService, mainRecordService, callbackFunc
     service.load();
     return service;
 }
+
+export async function getParcelImage(targetId, parcelpin) {
+    if (imageCache.has(parcelpin) && imageCache.get(parcelpin) === 'NO IMAGE') {
+        return;
+    }
+
+    if (imageCache.has(parcelpin)) {
+        document.getElementById(targetId).src = imageCache.get(parcelpin);
+        return;
+    };
+
+    const service = new FeatureService(
+        'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Citywide_Property_Survey_2022/FeatureServer/0/query',
+        ['survey_image_1'],
+        (() => {}),
+        [new WhereClause('survey_parcel', parcelpin)]
+    );
+    await service.load();
+    
+    const image1 = service.data.length !== 0 ? (service.data[0].survey_image_1 || 'NO IMAGE') : 'NO IMAGE';
+    imageCache.set(parcelpin, image1);
+
+    if (image1 === 'NO IMAGE') {
+       return; 
+    }
+
+    document.getElementById(targetId).src = image1;
+}
+
+const imageCache = new Map();  // (<parcelpin>, <survey_image_1>)
