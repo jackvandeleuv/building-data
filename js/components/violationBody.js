@@ -1,6 +1,6 @@
 import { FeatureService } from "../fetchEsri.js";
 
-export class ComplaintBody {
+export class ViolationBody {
     constructor(containerID) {
         this.containerID = containerID;
         this.__loaded = false;
@@ -18,16 +18,18 @@ export class ComplaintBody {
     async load(callbackFunction, filterStatements) {
         if (this.__loading || this.__loaded) return;
         this.__loading = true;
+        console.log(filterStatements)
 
         this.__service = new FeatureService(
-            'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Complaint_Status_History/FeatureServer/0/query',
+            'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Violation_Status_History/FeatureServer/0/query',
             [
-                'PERMIT_ID', 'FILE_DATE', 'SOURCE',
-                'CURRENT_TASK', 'CURRENT_TASK_STATUS', 'TASK_DATE',
-                'TYPE_OF_COMPLAINT', 'DW_Parcel'
+                'RECORD_ID', 'FILE_DATE', 'PRIMARY_ADDRESS',
+                'TASK_NAME', 'TASK_STATUS', 'TASK_SEQUENCE_NUMBER',
+                'TYPE_OF_VIOLATION', 'OCCUPANCY_OR_USE', 'ISSUE_DATE',
+                'ACCELA_CITIZEN_ACCESS_URL', 'DW_Parcel', 'TASK_DATE'
             ],
-            (() => {}),
-            filterStatements,
+            callbackFunction,
+            filterStatements
         );
         await this.__service.load();
 
@@ -38,7 +40,6 @@ export class ComplaintBody {
         }
 
         if (this.__service.data === undefined || this.__service.data.length === 0) {
-            console.log('complaintBody load fail!');
             this.__loaded = false;
             this.__loading = false;
             return;
@@ -49,12 +50,12 @@ export class ComplaintBody {
         this.__loading = false;
         callbackFunction();
     }
-    
+
     renderLoadedComponent() {
         const row = this.__service.data[0];
         
         document.getElementById(this.containerID).innerHTML = `
-            <h1>${row.PERMIT_ID}</h1>
+            <h1>${row.RECORD_ID}</h1>
             <p class="parcelPageSubHeader">${row.DW_Parcel}</p>
             <ul>
                 <li>CURRENT_TASK: ${row.CURRENT_TASK}</li>
@@ -64,10 +65,10 @@ export class ComplaintBody {
                 <li>TASK_DATE: ${row.TASK_DATE}</li>
                 <li>TYPE_OF_COMPLAINT: ${row.TYPE_OF_COMPLAINT}</li>
             </ul>
-        `;
+    `;
     }
 
     renderEmptyComponent() {
-        document.getElementById(this.containerID).innerHTML = 'Could not load complaint.';
+        document.getElementById(this.containerID).innerHTML = 'Could not load rental registration.';
     }
 }

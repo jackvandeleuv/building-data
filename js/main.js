@@ -253,7 +253,7 @@ function main() {
 
             <div class="parcelDetailBox">
                 <h2>Code Violation Records</h2>
-                <div class="parcelDetails", id="violationBox">
+                <div class="carosel", id="violationBox">
                 </div>
             </div>
 
@@ -261,7 +261,7 @@ function main() {
 
             <div class="parcelDetailBox">
                 <h2>Rental Registrations</h2>
-                <div class="parcelDetails", id="rentalBox">
+                <div class="carosel", id="rentalBox">
                 </div>
             </div>
         </div>

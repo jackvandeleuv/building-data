@@ -17,12 +17,12 @@ export class ComplaintPage {
             </div>
             <hr>
             <h3>Rental Registrations At This Parcel</h3>
-            <div id="rentalCarosel">
+            <div id="rentalCarosel" class="carosel">
                 Loading...
             </div>
             <hr>
             <h3>Violations About This Parcel</h3>
-            <div id="violationCarosel">
+            <div id="violationCarosel" class="carosel">
                 Loading...
             </div>
         `;
@@ -37,10 +37,10 @@ export class ComplaintPage {
         this.__rentalCarosel = new RentalCarosel('rentalCarosel');
         this.__violationCarosel = new ViolationCarosel('violationCarosel');
 
-        this.__complaintBody.load(this.__renderCarosels, filterStatements);
+        this.__complaintBody.load(this.renderCarosels, filterStatements);
     }
 
-    __renderCarosels = () => {
+    renderCarosels = () => {
         if (!this.__complaintBody.isLoaded()) {
             console.error('Could not load complaint.');
             return;
