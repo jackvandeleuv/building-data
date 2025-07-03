@@ -106,12 +106,18 @@ async function search() {
     const resultBoxHeader = document.getElementById('resultBoxHeader');
     const resultBox = document.getElementById('resultBox');
     resultBoxHeader.innerHTML = 'Searching...';
+
+    const geocodedParcelsRequest = findAddressCandidates(query);
+    const surveyParcelsRequest = getSurveyData(query, query);
+    const geocodedParcels = geocodedParcelsRequest;
+    const surveyParcels = await surveyParcelsRequest;
     
-    const data = await getSurveyData(await findAddressCandidates(query), query);
-    if (!data) {
+    if (!geocodedParcels && !surveyParcels) {
         notifyNoSearchResults();
         return;
     }
+
+    const data = [...surveyParcels, ...geocodedParcels];
 
     const parcels = data.map((d) => d.survey_parcel);
     if (parcels === undefined || parcels.length === 0) {
