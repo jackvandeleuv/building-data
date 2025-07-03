@@ -52,7 +52,7 @@ async function getSurveyData(query) {
     const f = await fetch(encodeURI(url));
     const j = await f.json();
 
-    return j.features.map((r) => r.attributes);
+    return j.features.map((r) => r.attributes) || [];
 }
 
 
@@ -204,7 +204,7 @@ async function findAddressCandidates(query) {
 
     const request = await fetch(url);
     const requestJSON =  await request.json();
-    return requestJSON.candidates.map((row) => row.attributes.ShortLabel);
+    return requestJSON.candidates.map((row) => row.attributes.ShortLabel) || [];
 }
 
 function main() {
