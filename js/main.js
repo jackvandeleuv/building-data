@@ -106,8 +106,10 @@ async function search() {
 
     const geocodedParcelsRequest = findAddressCandidates(query);
     const surveyParcelsRequest = getSurveyData(query);
-    const geocodedParcels = geocodedParcelsRequest;
+    const geocodedParcels = await geocodedParcelsRequest;
+    console.log(geocodedParcels);
     const surveyParcels = await surveyParcelsRequest;
+    console.log(surveyParcels);
     
     if (!geocodedParcels && !surveyParcels) {
         notifyNoSearchResults();
