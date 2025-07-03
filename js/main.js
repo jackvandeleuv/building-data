@@ -42,7 +42,7 @@ async function getSurveyData(query) {
     const url = (
         `https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/` +
         `Citywide_Property_Survey_2022/FeatureServer/0/query` +
-        `?where=address like '%${addressQuery}%' or survey_parcel like '%${query}%'` +
+        `?where=address like '%${query}%' or survey_parcel like '%${query}%'` +
         `&outFields=survey_address,survey_image_1,survey_grade,survey_parcel,survey_property_use` +
         `&resultRecordCount=20` +
         `&outSR=4326` +
