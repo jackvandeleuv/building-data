@@ -1,8 +1,9 @@
-import { WhereClause } from "../fetchEsri.js";
-import { RentalCarosel } from "./rentalCarosel.js";
-import { ComplaintCarosel } from "./complaintCarosel.js";
+import { WhereClause } from "../../fetchEsri.js";
+import { RentalCarosel } from "../rental/rentalCarosel.js";
+import { ComplaintCarosel } from "../complaint/complaintCarosel.js";
 import { ViolationBody } from "./violationBody.js";
-import { getParcelImage } from "../utils/utils.js";
+import { getParcelImage } from "../../utils/utils.js";
+import { DEFAULT_BUILDING_IMG } from "../../config.js";
 
 export class ViolationPage {
     // http://localhost:8000/?type=violation&record_id=V18037037
@@ -10,7 +11,7 @@ export class ViolationPage {
         document.getElementById('main').innerHTML = `
             <header class="parcelPageBanner">
                 <a href="javascript:history.back()" class="back-btn" aria-label="Go back"><</a>
-                <img id="headerImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Archean.png/1024px-Archean.png" alt="">
+                <img id="headerImage" src="${DEFAULT_BUILDING_IMG}" alt="">
             </header>            
             <div class="content" id="content"> 
                 <p>Loading...</p>

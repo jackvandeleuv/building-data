@@ -1,10 +1,11 @@
-import { WhereClause } from "../fetchEsri.js";
-import { RentalCarosel } from "./rentalCarosel.js";
-import { ComplaintCarosel } from "./complaintCarosel.js";
+import { WhereClause } from "../../fetchEsri.js";
+import { RentalCarosel } from "../rental/rentalCarosel.js";
+import { ComplaintCarosel } from "../complaint/complaintCarosel.js";
 import { ParcelBody } from "./parcelBody.js";
-import { ViolationCarosel } from "./violationCarosel.js";
+import { ViolationCarosel } from "../violation/violationCarosel.js";
 import { ParcelCarosel } from "./parcelCarosel.js";
-import { getParcelImage } from "../utils/utils.js";
+import { getParcelImage } from "../../utils/utils.js";
+import { DEFAULT_BUILDING_IMG } from "../../config.js";
 
 export class ParcelPage {
     // http://localhost:8000/?type=parcel&parcelpin=00234143
@@ -12,7 +13,7 @@ export class ParcelPage {
         document.getElementById('main').innerHTML = `
             <header class="parcelPageBanner">
                 <a href="javascript:history.back()" class="back-btn" aria-label="Go back"><</a>
-                <img id="headerImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Archean.png/1024px-Archean.png" alt="">
+                <img id="headerImage" src="${DEFAULT_BUILDING_IMG}" alt="">
             </header>            
             <div class="content" id="content"> 
                 <p>Loading...</p>

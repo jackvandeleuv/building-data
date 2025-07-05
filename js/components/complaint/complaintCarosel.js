@@ -1,7 +1,7 @@
-import { daysAgoLabel } from '../utils/utils.js';
-import { URI } from '../config.js';
-import { FeatureService } from '../fetchEsri.js';
-import { getParcelImage } from '../utils/utils.js';
+import { daysAgoLabel } from '../../utils/utils.js';
+import { URI } from '../../config.js';
+import { FeatureService } from '../../fetchEsri.js';
+import { getParcelImage } from '../../utils/utils.js';
 
 export class ComplaintCarosel {
     constructor(containerID) {

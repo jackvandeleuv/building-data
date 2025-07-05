@@ -1,8 +1,9 @@
-import { daysAgoLabel, getParcelImage } from '../utils/utils.js';
-import { URI } from '../config.js';
-import { FeatureService } from '../fetchEsri.js';
+import { daysAgoLabel } from '../../utils/utils.js';
+import { URI } from '../../config.js';
+import { FeatureService } from '../../fetchEsri.js';
+import { getParcelImage } from '../../utils/utils.js';
 
-export class ViolationCarosel {
+export class RentalCarosel {
     constructor(containerID) {
         this.containerID = containerID;
         this.__loaded = false;
@@ -22,12 +23,13 @@ export class ViolationCarosel {
         this.__loading = true;
 
         this.__service = new FeatureService(
-            'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Violation_Status_History/FeatureServer/0/query',
+            'https://services3.arcgis.com/dty2kHktVXHrqO8i/arcgis/rest/services/Rental_Registrations/FeatureServer/0/query',
             [
-                'RECORD_ID', 'FILE_DATE', 'PRIMARY_ADDRESS',
-                'TASK_NAME', 'TASK_STATUS', 'TASK_SEQUENCE_NUMBER',
-                'TYPE_OF_VIOLATION', 'OCCUPANCY_OR_USE', 'ISSUE_DATE',
-                'ACCELA_CITIZEN_ACCESS_URL', 'DW_Parcel', 'TASK_DATE'
+                "b1_alt_ID", "DW_Parcel", "AddressFull",
+                "FileDate", "Address", "Units",
+                "Status", "StatusDate", "OwnerName",
+                "OwnerOrgName", "OwnerAddress", "AdditionalContactName",
+                "AdditionalContactOrgName", "AdditionalContactRelation", "AdditionalContactAddress"
             ],
             callbackFunction,
             filterStatements
@@ -46,21 +48,21 @@ export class ViolationCarosel {
 
     makeLoadedCard(row, i) {
         return `
-            <a href="${encodeURI(URI + '?type=violation&record_id=' + row.RECORD_ID)}">
+            <a href="${encodeURI(URI + '?type=rental&record_id=' + row.b1_alt_ID)}">
                 <li class="carosel-item item">
-                    <img class="thumb" id="violationCardImage_${i}" src="">
+                    <img class="thumb" id="rentalCardImage_${i}" src="">
                     <div class="details">
                         <h4 class="title">
-                            ${row.TASK_STATUS}
+                            ${row.Status}
                         </h4>
                         <p class="violation-type">
-                            ${row.RECORD_ID}
+                            ${row.b1_alt_ID}
                         </p>
                         <p class="meta">
-                            ${row.TYPE_OF_VIOLATION}
+                            ${row.OwnerOrgName}
                         </p>
                         <p class="meta">
-                            Last update ${daysAgoLabel(row.TASK_DATE)}
+                            Last update ${daysAgoLabel(row.StatusDate)}
                         </p>
                     </div>
                     <span class="chevron">›</span>
@@ -70,20 +72,20 @@ export class ViolationCarosel {
     }
 
     renderEmptyComponent() {
-        document.getElementById(this.containerID).innerHTML = 'No violations found.';
+        document.getElementById(this.containerID).innerHTML = 'No rental registrations found.';
     }
 
     async renderLoadedComponent() {
-        let innerHTML = '';
         let i = 0;
+        let innerHTML = '';
         for (const row of this.__service.data) {
-            innerHTML = innerHTML + this.makeLoadedCard(row, i++)
+            innerHTML = innerHTML + this.makeLoadedCard(row, i++);
         }
         document.getElementById(this.containerID).innerHTML = innerHTML;
 
         let j = 0;
         for (const row of this.__service.data) {
-            await getParcelImage(`violationCardImage_${j++}`, row.DW_Parcel)
+            await getParcelImage(`rentalCardImage_${j++}`, row.DW_Parcel)
         }
     }
 }

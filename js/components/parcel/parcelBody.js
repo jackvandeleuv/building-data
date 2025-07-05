@@ -1,4 +1,4 @@
-import { FeatureService } from "../fetchEsri.js";
+import { FeatureService } from "../../fetchEsri.js";
 
 export class ParcelBody {
     constructor(containerID) {

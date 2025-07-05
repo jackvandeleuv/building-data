@@ -9,7 +9,7 @@ export class WhereClause {
 }
 
 export class FeatureService {
-    constructor(uri, selectedFields, callback, likeStatements=[], JSONPRequired=false, disabled=false) {
+    constructor(uri, selectedFields, callback, likeStatements=[], JSONPRequired=false, disabled=false, limit=100) {
         this.uri = uri;
         this.selectedFields = selectedFields;
         this.likeStatements = likeStatements;
@@ -19,19 +19,20 @@ export class FeatureService {
         this.data = [];
         this.__JSONPRequired = JSONPRequired;
         this.__disabled = disabled;
+        this.__limit = limit;
     }
 
     __makeParams() {
         const params = { 
-            outFields: this.selectedFields.join(',')
+            outFields: this.selectedFields.join(','),
+            resultRecordCount: this.__limit
         };
         
-        if (this.likeStatements.length === 0) {
-            return params;
-        } else {
-            params.where = this.likeStatements.map((stmt) => stmt.statement).join(' or ');
-            return params;
+        if (this.likeStatements.length !== 0) {
+            params.where = this.likeStatements.map((stmt) => stmt.statement).join(' or '); 
         } 
+
+        return params;
     }
 
     isDisabled() {
