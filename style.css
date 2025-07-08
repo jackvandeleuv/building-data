@@ -519,3 +519,105 @@ a {
   text-decoration: none; 
   color: inherit;    
 }
+
+.ownerLink {
+    text-decoration: underline;
+}
+
+.complaintHistoryCard {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 1px;
+    padding: 3px;
+}
+
+.complaintHistoryTask {
+    font-weight: 500;
+    padding: 3px;
+    border-radius: 5px solid black;
+}
+
+:root {
+  --accent: #3bb58a;
+  --accent-light: #b7eac6;
+  --text: #333;
+  --bg: #fff;
+  --input-h: 3rem;
+}
+
+.landing-page,
+.landing-page * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+}
+
+.landing-page {
+  width: 100%;
+  min-height: 100vh;            
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+}
+
+.landing-card {
+  width: 100%;
+  max-width: 600px;
+  background: rgb(255 255 255 / 0.10);  
+  backdrop-filter: blur(4px);
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.12);
+}
+
+.landing-card h1 {
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.2;
+  font-weight: 700;
+  color: #fff;
+}
+
+.landing-card .landing-subtitle {
+  margin-top: 0.5rem;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  color: rgb(255 255 255 / 0.9);
+}
+
+.landing-search {
+  margin-top: 1.75rem;
+}
+
+.landing-search input {
+  width: 100%;
+  height: var(--input-h);
+  padding: 0 1rem;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.landing-search input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgb(59 181 138 / 0.30);
+}
+
+@media (min-width: 768px) {
+  .landing-page {
+    padding: 2rem;
+  }
+
+  .landing-card {
+    padding: 3rem 2rem 3.5rem;
+  }
+}

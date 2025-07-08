@@ -1,15 +1,21 @@
-import { RentalPage } from "./components/rental/rentalPage.js";
-import { ComplaintPage } from "./components/complaint/complaintPage.js";
-import { ViolationPage } from "./components/violation/violationPage.js";
-import { ParcelPage } from "./components/parcel/parcelPage.js";
-import { SearchPage } from "./components/search/searchPage.js";
+import { RentalPage } from "./components/pages/rentalPage.js";
+import { ComplaintPage } from "./components/pages/complaintPage.js";
+import { ViolationPage } from "./components/pages/violationPage.js";
+import { ParcelPage } from "./components/pages/parcelPage.js";
+import { SearchPage } from "./components/pages/searchPage.js";
+import { OwnerPage } from "./components/pages/ownerPage.js";
+import { LandingPage } from "./components/pages/landingPage.js";
 
 function main() {
     const params = new URLSearchParams(window.location.search);
-    const pageType = params.get("type") || 'search';
+    const pageType = params.get("type") || '';
 
-    if (pageType === 'search') {
+    if (pageType === '') {
+        new LandingPage();
+    } else if (pageType === 'search') {
         new SearchPage();
+    } else if (pageType === 'owner') {
+        new OwnerPage();
     } else if (pageType === 'parcel') {
         new ParcelPage();
     } else if (pageType === 'rental') {
@@ -18,6 +24,8 @@ function main() {
         new ComplaintPage();
     } else if (pageType === 'violation') {
         new ViolationPage();
+    } else {
+        document.getElementById('main').innerHTML = '<h1>404: Not Found.</h1>'
     }
 }
 

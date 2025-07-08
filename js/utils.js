@@ -1,4 +1,4 @@
-import { WhereClause, FeatureService } from "../fetchEsri.js";
+import { WhereClause, FeatureService } from "./fetchEsri.js";
 
 export function daysAgoLabel(unixDate) {
     const delta = Date.now() - unixDate;
