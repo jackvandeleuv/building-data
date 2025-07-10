@@ -1,239 +1,215 @@
+// searchPage.js  – all-Tailwind version with padded cards
 import { DEFAULT_BUILDING_IMG, DEFAULT_OWNER_IMG, URI } from '../../config.js';
 
 export class SearchPage {
-    constructor() {
-        const params = new URLSearchParams(window.location.search);
-        this.query = (params.get("q") || '').trim();
+  constructor() {
+    const params = new URLSearchParams(window.location.search);
+    this.query = (params.get('q') || '').trim();
 
-        document.getElementById('main').innerHTML = `
-            <header class="page-header">
-                <h1>Access Building Data</h1>
-                <p class="subtitle">Find building and housing data on Cleveland properties</p>
-            </header>
+    /* ----------  Scaffold ---------- */
+    document.getElementById('main').innerHTML = `
+      <header class="max-w-4xl mx-auto px-4 pt-8 text-center">
+        <h1 class="text-3xl font-bold text-gray-900">Access Building Data</h1>
+        <p class="mt-1 text-gray-500">
+          Find building and housing data on Cleveland properties
+        </p>
+      </header>
 
-            <div class="searchPageMainBox">
-                <div class="searchbox">
-                    <input 
-                        type="text" 
-                        role="combobox" 
-                        placeholder="Address, owner, parcel, or record ID"
-                        value="" 
-                        id="searchElem"
-                    >
-                </div>
-                <h3 id="resultBoxHeader"></h3>
-                <div class="resultBox" id="resultBox">
-                    ${this.query === '' ? '' : '<progress id="progressBar"></progress>'}
-                </div>
-            </div>
-        `;
+      <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+        <div class="flex rounded-lg shadow bg-white overflow-hidden focus-within:ring-2 focus-within:ring-indigo-600">
+          <input
+            id="searchElem"
+            role="combobox"
+            type="text"
+            placeholder="Address, owner, parcel, or record ID"
+            class="flex-1 px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none"
+          />
+        </div>
 
-        document.getElementById('searchElem').addEventListener('keydown', (async (e) => {
-            if (e.key !== 'Enter') return;
-            window.location = encodeURI(`${URI}?type=search&q=${e.currentTarget.value}`);
-        }));
+        <h3 id="resultBoxHeader" class="text-lg font-medium text-gray-700"></h3>
 
-        if (this.query === '') {
-            return;
-        }
+        <div id="resultBox" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          ${this.query === '' ? '' : '<progress id="progressBar" class="w-full"></progress>'}
+        </div>
+      </div>
+    `;
 
-        this.search(this.query)
+    /* ----------  Events ---------- */
+    document
+      .getElementById('searchElem')
+      .addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        window.location = encodeURI(`${URI}?type=search&q=${e.currentTarget.value}`);
+      });
+
+    if (this.query) this.search(this.query);
+  }
+
+  /* ----------  Data fetch / render ---------- */
+  async search(query) {
+    const response = await fetch(encodeURI(`http://localhost:5000/search/${query}`));
+    const results = await response.json();
+
+    if (!results.length) {
+      document.getElementById('resultBox').innerHTML =
+        '<h3 class="col-span-full text-center text-gray-600">No results.</h3>';
+      return;
     }
 
-    async search(query) {
-        const url = `http://localhost:5000/search/${query}`;
-
-        const response = await fetch(encodeURI(url));
-        const results = await response.json();
-
-        if (results.length === 0) {
-            document.getElementById('resultBox').innerHTML = '<h3>No results.</h3>';
-            return;
-        }
-
-        let innerHTML = '';
-        let i = 0;
-        for (const row of results) {
-            let card = {};
-            if (row.type === 'parcel') {
-                card = new ParcelCard(row.data, i++);
-            } else if (row.type === 'violation') {
-                card = new ViolationCard(row.data, i++);
-            } else if (row.type === 'complaint') {
-                card = new ComplaintCard(row.data, i++);
-            } else if (row.type === 'rental_registration') {
-                card = new RentalCard(row.data, i++);
-            } else if (row.type === 'owner') {
-                card = new OwnerCard(row.data, i++);
-            } else {
-                console.error('Unrecognized search result type.')
-                continue
-            }
-            innerHTML = innerHTML + card.makeHTML();
-        }
-
-        document.getElementById('resultBox').innerHTML = innerHTML;
+    let innerHTML = '';
+    let i = 0;
+    for (const row of results) {
+      const maker = {
+        parcel: ParcelCard,
+        violation: ViolationCard,
+        complaint: ComplaintCard,
+        rental_registration: RentalCard,
+        owner: OwnerCard
+      }[row.type];
+      if (!maker) continue;
+      innerHTML += new maker(row.data, i++).makeHTML();
     }
+    document.getElementById('resultBox').innerHTML = innerHTML;
+  }
 }
-            
-class ParcelCard {
-    constructor(data, index) {
-        const parcelpin = data.parcelpin || '';
-        const owner = data.deeded_owner_clean || '';
-        const url = encodeURI(`${URI}?type=parcel&parcelpin=${parcelpin}&owner=${owner}`);
-        this.HTML = `
-            <a class="card" href="${url}">
-                <figure class="card__photo">
-                    <img id="rentalCardImage_${index}" src="${data.photo_link || DEFAULT_BUILDING_IMG}">
-                    <span class="badge">${data.property_use || ''} Parcel</span>
-                    <button class="save" aria-label="">
-                        ${data.survey_grade_result || ''}
-                    </button>
-                </figure>
-    
-                <div class="body">
-                    <div class="survey-line">${data.par_addr_all}</div>
-                    <p class="ownerLink">
-                        ${data.deeded_owner_main_alias}
-                    </p>
-                    <div class="address">Parcel: ${data.parcelpin}</div>
-    
-                    <div class="inventory">
-                        <div class="inv">
-                            <strong id="violationSubHeader_${index}">${data.total_complaints}</strong>
-                            <small>Complaints</small>
-                        </div>
-                        <div class="inv">
-                            <strong id="violationSubHeader_${index}">${data.total_violations}</strong>
-                            <small>Code Violations</small>
-                        </div>
-                        <div class="inv">
-                            <strong id="rentalSubHeader_${index}">${data.total_rentals}</strong>
-                            <small>Rental Registrations</small>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        `;
-    }
 
-    makeHTML() {
-        return this.HTML;
-    }
+/* ----------  Card factory ---------- */
+const baseCard = (content, badge, badgeColor) => `
+  <a href="${content.url}" class="block p-3 bg-white rounded-lg shadow transition hover:shadow-lg">
+    <figure class="relative rounded-md overflow-hidden">
+      <img src="${content.img}" alt="" class="w-full h-48 object-cover">
+      <span class="absolute top-2 left-2 inline-block rounded px-2 py-0.5 text-xs font-semibold text-white ${badgeColor}">
+        ${badge}
+      </span>
+      ${content.save ?? ''}
+    </figure>
+    <div class="pt-4">
+      ${content.body}
+    </div>
+  </a>
+`;
+
+/* ----------  Individual card components ---------- */
+class ParcelCard {
+  constructor(d) {
+    this.HTML = baseCard(
+      {
+        url: encodeURI(`${URI}?type=parcel&parcelpin=${d.parcelpin}&owner=${d.deeded_owner_clean}`),
+        img: d.photo_link || DEFAULT_BUILDING_IMG,
+        save: d.survey_grade_result
+          ? `<button aria-label="" class="absolute top-2 right-2 rounded bg-white/80 backdrop-blur px-1.5 text-sm font-medium text-gray-800">${d.survey_grade_result}</button>`
+          : '',
+        body: `
+          <div class="text-lg font-semibold">${d.par_addr_all}</div>
+          <p class="text-sm text-indigo-600 truncate">${d.deeded_owner_main_alias || '&nbsp;'}</p>
+          <div class="mt-2 text-sm text-gray-500">Parcel: ${d.parcelpin}</div>
+
+          <div class="mt-4 flex justify-between text-center text-sm">
+            <div><span class="block text-xl font-bold">${d.total_complaints}</span>Complaints</div>
+            <div><span class="block text-xl font-bold">${d.total_violations}</span>Code&nbsp;Violations</div>
+            <div><span class="block text-xl font-bold">${d.total_rentals}</span>Rentals</div>
+          </div>
+        `
+      },
+      `${d.property_use || ''} Parcel`,
+      'bg-indigo-600'
+    );
+  }
+  makeHTML() {
+    return this.HTML;
+  }
 }
 
 class OwnerCard {
-    constructor(data, index) {
-        this.HTML = `
-             <a class="card" href="${encodeURI(URI + '?type=owner&owner=' + data.deeded_owner_clean) || ''}">
-                <figure class="card__photo">
-                    <img id="rentalCardImage_${index}" src="${DEFAULT_OWNER_IMG}">
-                    <span class="badge" style="background-color: blue">Owner</span>
-                </figure>
-    
-                <div class="body">
-                    <div class="survey-line">${data.deeded_owner_main_alias}</div>
-    
-                    <div class="inventory">
-                        <div class="inv">
-                            <strong id="ownerSubHeader_${index}">${data.parcels_owned}</strong>
-                            <small>Parcels Owned</small>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        `;
-    }
-
-    makeHTML() {
-        return this.HTML;
-    }
+  constructor(d) {
+    this.HTML = baseCard(
+      {
+        url: encodeURI(`${URI}?type=owner&owner=${d.deeded_owner_clean}`),
+        img: DEFAULT_OWNER_IMG,
+        body: `
+          <div class="text-lg font-semibold">${d.deeded_owner_main_alias}</div>
+          <div class="mt-4 text-center text-sm">
+            <span class="block text-xl font-bold">${d.parcels_owned}</span>Parcels&nbsp;Owned
+          </div>
+        `
+      },
+      'Owner',
+      'bg-blue-600'
+    );
+  }
+  makeHTML() {
+    return this.HTML;
+  }
 }
 
 class ViolationCard {
-    constructor(data, index) {
-        const parcelpin = data.parcelpin || '';
-        const owner = data.deeded_owner_clean || '';
-        const record_id = data.record_id || '';
-        const url = encodeURI(`${URI}?type=violation&record_id=${record_id}&parcelpin=${parcelpin}&owner=${owner}`);
-
-        this.HTML = `
-            <a class="card" href="${url}">
-                <figure class="card__photo">
-                    <img id="rentalCardImage_${index}" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Round_Landmark_Icon_House.svg/480px-Round_Landmark_Icon_House.svg.png">
-                    <span class="badge" style="background-color: red">Violation</span>
-                </figure>
-    
-                <div class="body">
-                    <div class="survey-line">${data.record_id}</div>
-                    <div class="address">Type of Violation: ${data.type_of_violation}</div>
-                    <div class="address">Parcel: ${data.parcelpin}</div>
-                    <div class="address">Property Address: ${data.par_addr_all}</div>
-
-                </div>
-            </a>
-        `;
-    }
-
-    makeHTML() {
-        return this.HTML;
-    }
+  constructor(d) {
+    this.HTML = baseCard(
+      {
+        url: encodeURI(
+          `${URI}?type=violation&record_id=${d.record_id}&parcelpin=${d.parcelpin}&owner=${d.deeded_owner_clean}`
+        ),
+        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Round_Landmark_Icon_House.svg/480px-Round_Landmark_Icon_House.svg.png',
+        body: `
+          <div class="text-lg font-semibold">${d.record_id}</div>
+          <div class="mt-1 text-sm text-gray-500">Type: ${d.type_of_violation}</div>
+          <div class="text-sm text-gray-500">Parcel: ${d.parcelpin}</div>
+          <div class="text-sm text-gray-500">Address: ${d.par_addr_all}</div>
+        `
+      },
+      'Violation',
+      'bg-red-600'
+    );
+  }
+  makeHTML() {
+    return this.HTML;
+  }
 }
 
 class ComplaintCard {
-    constructor(data, index) {
-        const parcelpin = data.parcelpin || '';
-        const owner = data.deeded_owner_clean || '';
-        const record_id = data.record_id || '';
-        const url = encodeURI(`${URI}?type=complaint&record_id=${record_id}&parcelpin=${parcelpin}&owner=${owner}`);
-
-        this.HTML = `
-            <a class="card" href="${url}">
-                <figure class="card__photo">
-                    <img id="rentalCardImage_${index}" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Round_Landmark_Icon_House.svg/480px-Round_Landmark_Icon_House.svg.png">
-                    <span class="badge" style="background-color: chocolate">Complaint</span>
-                </figure>
-    
-                <div class="body">
-                    <div class="survey-line">${data.record_id}</div>
-                    <div class="address">Type of Complaint: ${data.type_of_complaint}</div>
-                    <div class="address">Property Address: ${data.par_addr_all}</div>
-                    <div class="address">Parcel: ${data.parcelpin}</div>
-                </div>
-            </a>
-        `;
-    }
-
-    makeHTML() {
-        return this.HTML;
-    }
+  constructor(d) {
+    this.HTML = baseCard(
+      {
+        url: encodeURI(
+          `${URI}?type=complaint&record_id=${d.record_id}&parcelpin=${d.parcelpin}&owner=${d.deeded_owner_clean}`
+        ),
+        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Round_Landmark_Icon_House.svg/480px-Round_Landmark_Icon_House.svg.png',
+        body: `
+          <div class="text-lg font-semibold">${d.record_id}</div>
+          <div class="mt-1 text-sm text-gray-500">Type: ${d.type_of_complaint}</div>
+          <div class="text-sm text-gray-500">Address: ${d.par_addr_all}</div>
+          <div class="text-sm text-gray-500">Parcel: ${d.parcelpin}</div>
+        `
+      },
+      'Complaint',
+      'bg-amber-600'
+    );
+  }
+  makeHTML() {
+    return this.HTML;
+  }
 }
 
 class RentalCard {
-    constructor(data, index) {
-        const parcelpin = data.parcelpin || '';
-        const owner = data.deeded_owner_clean || '';
-        const record_id = data.record_id || '';
-        const url = encodeURI(`${URI}?type=rental&record_id=${record_id}&parcelpin=${parcelpin}&owner=${owner}`);
-
-        this.HTML = `
-            <a class="card" href="${url}">
-                <figure class="card__photo">
-                    <img id="rentalCardImage_${index}" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Round_Landmark_Icon_House.svg/480px-Round_Landmark_Icon_House.svg.png">
-                    <span class="badge" style="background-color: purple">Rental Registration</span>
-                </figure>
-    
-                <div class="body">
-                    <div class="survey-line">${data.record_id}</div>
-                    <div class="address">Owner Org Name: ${data.deeded_owner_main_alias}</div>
-                    <div class="address">Property Address: ${data.par_addr_all}</div>
-                    <div class="address">Parcel: ${data.parcelpin}</div>
-                </div>
-            </a>
-        `;
-    }
-
-    makeHTML() {
-        return this.HTML;
-    }
+  constructor(d) {
+    this.HTML = baseCard(
+      {
+        url: encodeURI(
+          `${URI}?type=rental&record_id=${d.record_id}&parcelpin=${d.parcelpin}&owner=${d.deeded_owner_clean}`
+        ),
+        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Round_Landmark_Icon_House.svg/480px-Round_Landmark_Icon_House.svg.png',
+        body: `
+          <div class="text-lg font-semibold">${d.record_id}</div>
+          <div class="mt-1 text-sm text-gray-500">Owner: ${d.deeded_owner_main_alias}</div>
+          <div class="text-sm text-gray-500">Address: ${d.par_addr_all}</div>
+          <div class="text-sm text-gray-500">Parcel: ${d.parcelpin}</div>
+        `
+      },
+      'Rental Reg.',
+      'bg-purple-600'
+    );
+  }
+  makeHTML() {
+    return this.HTML;
+  }
 }
